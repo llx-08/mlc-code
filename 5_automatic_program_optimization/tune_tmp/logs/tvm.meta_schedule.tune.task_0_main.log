@@ -1,0 +1,364 @@
+2022-08-13 22:36:39.652 INFO Initializing Task #0: "main"
+2022-08-13 22:36:39.652 INFO 
+@tvm.script.ir_module
+class Module:
+    @tir.prim_func
+    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        # with tir.block("root")
+        for i, j, k in tir.grid(128, 128, 128):
+            with tir.block("C"):
+                vi, vj, vk = tir.axis.remap("SSR", [i, j, k])
+                tir.reads(A[vi, vk], B[vk, vj])
+                tir.writes(C[vi, vj])
+                with tir.init():
+                    C[vi, vj] = tir.float32(0)
+                C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
+    
+2022-08-13 22:36:39.658 INFO Total 1 design space(s) generated
+2022-08-13 22:36:39.658 INFO Design space #0:
+@tvm.script.ir_module
+class Module:
+    @tir.prim_func
+    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        # with tir.block("root")
+        for i, j_0 in tir.grid(128, 8):
+            for j_1_init in tir.serial(16):
+                with tir.block("C_init"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 16 + j_1_init)
+                    tir.reads()
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = tir.float32(0)
+            for k, j_1 in tir.grid(128, 16):
+                with tir.block("C_update"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 16 + j_1)
+                    vk = tir.axis.reduce(128, k)
+                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
+    
+b0 = sch.get_block(name="C", func_name="main")
+l1, l2, l3 = sch.get_loops(block=b0)
+v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[8, 16])
+l6, l7 = sch.split(loop=l2, factors=[v4, v5])
+sch.reorder(l1, l6, l3, l7)
+b8 = sch.decompose_reduction(block=b0, loop=l3)
+2022-08-13 22:36:39.698 INFO Generating candidates......
+2022-08-13 22:36:39.698 INFO Picked top 0 candidate(s) from database
+2022-08-13 22:36:39.803 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
+2022-08-13 22:36:39.803 INFO Sampled 2048 candidate(s)
+2022-08-13 22:36:40.317 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
+2022-08-13 22:36:40.787 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
+2022-08-13 22:36:41.271 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
+2022-08-13 22:36:41.811 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
+2022-08-13 22:36:41.952 INFO Scores of the best 5 candidates:
+[1 : 5]:	0.7609  0.7440  0.5579  0.3912  0.0325
+2022-08-13 22:36:41.979 INFO Got 5 candidate(s) with evolutionary search
+2022-08-13 22:36:41.985 INFO Sending 5 candidates(s) for measurement
+2022-08-13 22:36:43.234 INFO [Task #0: "main"] Trial #0: Error in building: LocalRunner: An exception occurred
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
+    restore_signals, start_new_session)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
+    startupinfo)
+FileNotFoundError: [WinError 2] 系统找不到指定的文件。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
+    result = fn(*args, **kwargs)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
+    rt_mod = tvm.runtime.load_module(artifact_path)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
+    _cc.create_shared(path + ".so", files)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
+    _windows_compile(output, objects, options)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
+    "Can not find the LLVM clang for Windows clang.exe)."
+RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
+
+@tvm.script.ir_module
+class Module:
+    @tir.prim_func
+    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        # with tir.block("root")
+        for i, j_0 in tir.grid(128, 64):
+            for j_1_init in tir.serial(2):
+                with tir.block("C_init"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 2 + j_1_init)
+                    tir.reads()
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = tir.float32(0)
+            for k, j_1 in tir.grid(128, 2):
+                with tir.block("C_update"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 2 + j_1)
+                    vk = tir.axis.reduce(128, k)
+                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
+    
+b0 = sch.get_block(name="C", func_name="main")
+l1, l2, l3 = sch.get_loops(block=b0)
+v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[64, 2])
+l6, l7 = sch.split(loop=l2, factors=[v4, v5])
+sch.reorder(l1, l6, l3, l7)
+b8 = sch.decompose_reduction(block=b0, loop=l3)
+sch.enter_postproc()
+2022-08-13 22:36:43.235 INFO [Task #0: "main"] Trial #1: Error in building: LocalRunner: An exception occurred
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
+    restore_signals, start_new_session)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
+    startupinfo)
+FileNotFoundError: [WinError 2] 系统找不到指定的文件。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
+    result = fn(*args, **kwargs)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
+    rt_mod = tvm.runtime.load_module(artifact_path)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
+    _cc.create_shared(path + ".so", files)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
+    _windows_compile(output, objects, options)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
+    "Can not find the LLVM clang for Windows clang.exe)."
+RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
+
+@tvm.script.ir_module
+class Module:
+    @tir.prim_func
+    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        # with tir.block("root")
+        for i, j_0 in tir.grid(128, 32):
+            for j_1_init in tir.serial(4):
+                with tir.block("C_init"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 4 + j_1_init)
+                    tir.reads()
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = tir.float32(0)
+            for k, j_1 in tir.grid(128, 4):
+                with tir.block("C_update"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 4 + j_1)
+                    vk = tir.axis.reduce(128, k)
+                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
+    
+b0 = sch.get_block(name="C", func_name="main")
+l1, l2, l3 = sch.get_loops(block=b0)
+v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[32, 4])
+l6, l7 = sch.split(loop=l2, factors=[v4, v5])
+sch.reorder(l1, l6, l3, l7)
+b8 = sch.decompose_reduction(block=b0, loop=l3)
+sch.enter_postproc()
+2022-08-13 22:36:43.236 INFO [Task #0: "main"] Trial #2: Error in building: LocalRunner: An exception occurred
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
+    restore_signals, start_new_session)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
+    startupinfo)
+FileNotFoundError: [WinError 2] 系统找不到指定的文件。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
+    result = fn(*args, **kwargs)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
+    rt_mod = tvm.runtime.load_module(artifact_path)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
+    _cc.create_shared(path + ".so", files)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
+    _windows_compile(output, objects, options)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
+    "Can not find the LLVM clang for Windows clang.exe)."
+RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
+
+@tvm.script.ir_module
+class Module:
+    @tir.prim_func
+    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        # with tir.block("root")
+        for i, j_0 in tir.grid(128, 8):
+            for j_1_init in tir.serial(16):
+                with tir.block("C_init"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 16 + j_1_init)
+                    tir.reads()
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = tir.float32(0)
+            for k, j_1 in tir.grid(128, 16):
+                with tir.block("C_update"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 16 + j_1)
+                    vk = tir.axis.reduce(128, k)
+                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
+    
+b0 = sch.get_block(name="C", func_name="main")
+l1, l2, l3 = sch.get_loops(block=b0)
+v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[8, 16])
+l6, l7 = sch.split(loop=l2, factors=[v4, v5])
+sch.reorder(l1, l6, l3, l7)
+b8 = sch.decompose_reduction(block=b0, loop=l3)
+sch.enter_postproc()
+2022-08-13 22:36:43.236 INFO [Task #0: "main"] Trial #3: Error in building: LocalRunner: An exception occurred
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
+    restore_signals, start_new_session)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
+    startupinfo)
+FileNotFoundError: [WinError 2] 系统找不到指定的文件。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
+    result = fn(*args, **kwargs)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
+    rt_mod = tvm.runtime.load_module(artifact_path)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
+    _cc.create_shared(path + ".so", files)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
+    _windows_compile(output, objects, options)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
+    "Can not find the LLVM clang for Windows clang.exe)."
+RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
+
+@tvm.script.ir_module
+class Module:
+    @tir.prim_func
+    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        # with tir.block("root")
+        for i, j_0 in tir.grid(128, 128):
+            for j_1_init in tir.serial(1):
+                with tir.block("C_init"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 + j_1_init)
+                    tir.reads()
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = tir.float32(0)
+            for k, j_1 in tir.grid(128, 1):
+                with tir.block("C_update"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 + j_1)
+                    vk = tir.axis.reduce(128, k)
+                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
+    
+b0 = sch.get_block(name="C", func_name="main")
+l1, l2, l3 = sch.get_loops(block=b0)
+v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[128, 1])
+l6, l7 = sch.split(loop=l2, factors=[v4, v5])
+sch.reorder(l1, l6, l3, l7)
+b8 = sch.decompose_reduction(block=b0, loop=l3)
+sch.enter_postproc()
+2022-08-13 22:36:43.237 INFO [Task #0: "main"] Trial #4: Error in building: LocalRunner: An exception occurred
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
+    restore_signals, start_new_session)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
+    startupinfo)
+FileNotFoundError: [WinError 2] 系统找不到指定的文件。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
+    result = fn(*args, **kwargs)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
+    rt_mod = tvm.runtime.load_module(artifact_path)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
+    _cc.create_shared(path + ".so", files)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
+    _windows_compile(output, objects, options)
+  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
+    "Can not find the LLVM clang for Windows clang.exe)."
+RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
+
+@tvm.script.ir_module
+class Module:
+    @tir.prim_func
+    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        # with tir.block("root")
+        for i, j_0 in tir.grid(128, 16):
+            for j_1_init in tir.serial(8):
+                with tir.block("C_init"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 8 + j_1_init)
+                    tir.reads()
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = tir.float32(0)
+            for k, j_1 in tir.grid(128, 8):
+                with tir.block("C_update"):
+                    vi = tir.axis.spatial(128, i)
+                    vj = tir.axis.spatial(128, j_0 * 8 + j_1)
+                    vk = tir.axis.reduce(128, k)
+                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
+                    tir.writes(C[vi, vj])
+                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
+    
+b0 = sch.get_block(name="C", func_name="main")
+l1, l2, l3 = sch.get_loops(block=b0)
+v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[16, 8])
+l6, l7 = sch.split(loop=l2, factors=[v4, v5])
+sch.reorder(l1, l6, l3, l7)
+b8 = sch.decompose_reduction(block=b0, loop=l3)
+sch.enter_postproc()
