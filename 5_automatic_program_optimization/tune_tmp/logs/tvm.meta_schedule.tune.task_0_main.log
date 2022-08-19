@@ -1,364 +1,534 @@
-2022-08-13 22:36:39.652 INFO Initializing Task #0: "main"
-2022-08-13 22:36:39.652 INFO 
+2022-08-18 09:37:11.418 INFO Initializing Task #0: "main"
+2022-08-18 09:37:11.419 INFO 
 @tvm.script.ir_module
 class Module:
-    @tir.prim_func
-    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+    @T.prim_func
+    def main(A: T.Buffer[(128, 128), "float32"], B: T.Buffer[(128, 128), "float32"], C: T.Buffer[(128, 128), "float32"]) -> None:
         # function attr dict
-        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        T.func_attr({"global_symbol": "main", "tir.noalias": True})
         # body
-        # with tir.block("root")
-        for i, j, k in tir.grid(128, 128, 128):
-            with tir.block("C"):
-                vi, vj, vk = tir.axis.remap("SSR", [i, j, k])
-                tir.reads(A[vi, vk], B[vk, vj])
-                tir.writes(C[vi, vj])
-                with tir.init():
-                    C[vi, vj] = tir.float32(0)
+        # with T.block("root")
+        for i, j, k in T.grid(128, 128, 128):
+            with T.block("C"):
+                vi, vj, vk = T.axis.remap("SSR", [i, j, k])
+                T.reads(A[vi, vk], B[vk, vj])
+                T.writes(C[vi, vj])
+                with T.init():
+                    C[vi, vj] = T.float32(0)
                 C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
     
-2022-08-13 22:36:39.658 INFO Total 1 design space(s) generated
-2022-08-13 22:36:39.658 INFO Design space #0:
+2022-08-18 09:37:11.420 INFO Total 1 design space(s) generated
+2022-08-18 09:37:11.421 INFO Design space #0:
 @tvm.script.ir_module
 class Module:
-    @tir.prim_func
-    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+    @T.prim_func
+    def main(A: T.Buffer[(128, 128), "float32"], B: T.Buffer[(128, 128), "float32"], C: T.Buffer[(128, 128), "float32"]) -> None:
         # function attr dict
-        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        T.func_attr({"global_symbol": "main", "tir.noalias": True})
         # body
-        # with tir.block("root")
-        for i, j_0 in tir.grid(128, 8):
-            for j_1_init in tir.serial(16):
-                with tir.block("C_init"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 16 + j_1_init)
-                    tir.reads()
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = tir.float32(0)
-            for k, j_1 in tir.grid(128, 16):
-                with tir.block("C_update"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 16 + j_1)
-                    vk = tir.axis.reduce(128, k)
-                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
-    
-b0 = sch.get_block(name="C", func_name="main")
-l1, l2, l3 = sch.get_loops(block=b0)
-v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[8, 16])
-l6, l7 = sch.split(loop=l2, factors=[v4, v5])
-sch.reorder(l1, l6, l3, l7)
-b8 = sch.decompose_reduction(block=b0, loop=l3)
-2022-08-13 22:36:39.698 INFO Generating candidates......
-2022-08-13 22:36:39.698 INFO Picked top 0 candidate(s) from database
-2022-08-13 22:36:39.803 INFO Sample-Init-Population summary:
-Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
-Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
-Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
-2022-08-13 22:36:39.803 INFO Sampled 2048 candidate(s)
-2022-08-13 22:36:40.317 INFO Evolve iter #0 done. Summary:
-Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
-Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
-Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
-2022-08-13 22:36:40.787 INFO Evolve iter #1 done. Summary:
-Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
-Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
-Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
-2022-08-13 22:36:41.271 INFO Evolve iter #2 done. Summary:
-Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
-Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
-Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
-2022-08-13 22:36:41.811 INFO Evolve iter #3 done. Summary:
-Postproc #0 [meta_schedule.DisallowDynamicLoop(0000019E6AE975A8)]: 0 failure(s)
-Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0000019E6AE97128)]: 0 failure(s)
-Postproc #2 [meta_schedule.RewriteReductionBlock(0000019E6AE970E8)]: 0 failure(s)
-2022-08-13 22:36:41.952 INFO Scores of the best 5 candidates:
-[1 : 5]:	0.7609  0.7440  0.5579  0.3912  0.0325
-2022-08-13 22:36:41.979 INFO Got 5 candidate(s) with evolutionary search
-2022-08-13 22:36:41.985 INFO Sending 5 candidates(s) for measurement
-2022-08-13 22:36:43.234 INFO [Task #0: "main"] Trial #0: Error in building: LocalRunner: An exception occurred
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
-    restore_signals, start_new_session)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
-    startupinfo)
-FileNotFoundError: [WinError 2] 系统找不到指定的文件。
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
-    result = fn(*args, **kwargs)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
-    rt_mod = tvm.runtime.load_module(artifact_path)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
-    _cc.create_shared(path + ".so", files)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
-    _windows_compile(output, objects, options)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
-    "Can not find the LLVM clang for Windows clang.exe)."
-RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
-
-@tvm.script.ir_module
-class Module:
-    @tir.prim_func
-    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
-        # function attr dict
-        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
-        # body
-        # with tir.block("root")
-        for i, j_0 in tir.grid(128, 64):
-            for j_1_init in tir.serial(2):
-                with tir.block("C_init"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 2 + j_1_init)
-                    tir.reads()
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = tir.float32(0)
-            for k, j_1 in tir.grid(128, 2):
-                with tir.block("C_update"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 2 + j_1)
-                    vk = tir.axis.reduce(128, k)
-                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
-                    tir.writes(C[vi, vj])
+        # with T.block("root")
+        for i, j_0 in T.grid(128, 64):
+            for j_1_init in T.serial(2):
+                with T.block("C_init"):
+                    vi = T.axis.spatial(128, i)
+                    vj = T.axis.spatial(128, j_0 * 2 + j_1_init)
+                    T.reads()
+                    T.writes(C[vi, vj])
+                    C[vi, vj] = T.float32(0)
+            for k, j_1 in T.grid(128, 2):
+                with T.block("C_update"):
+                    vi = T.axis.spatial(128, i)
+                    vj = T.axis.spatial(128, j_0 * 2 + j_1)
+                    vk = T.axis.reduce(128, k)
+                    T.reads(C[vi, vj], A[vi, vk], B[vk, vj])
+                    T.writes(C[vi, vj])
                     C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
     
 b0 = sch.get_block(name="C", func_name="main")
 l1, l2, l3 = sch.get_loops(block=b0)
 v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[64, 2])
-l6, l7 = sch.split(loop=l2, factors=[v4, v5])
+l6, l7 = sch.split(loop=l2, factors=[v4, v5], preserve_unit_iters=True)
 sch.reorder(l1, l6, l3, l7)
 b8 = sch.decompose_reduction(block=b0, loop=l3)
-sch.enter_postproc()
-2022-08-13 22:36:43.235 INFO [Task #0: "main"] Trial #1: Error in building: LocalRunner: An exception occurred
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
-    restore_signals, start_new_session)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
-    startupinfo)
-FileNotFoundError: [WinError 2] 系统找不到指定的文件。
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
-    result = fn(*args, **kwargs)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
-    rt_mod = tvm.runtime.load_module(artifact_path)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
-    _cc.create_shared(path + ".so", files)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
-    _windows_compile(output, objects, options)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
-    "Can not find the LLVM clang for Windows clang.exe)."
-RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
-
+2022-08-18 09:37:11.434 INFO Generating candidates......
+2022-08-18 09:37:11.435 INFO Picked top 0 candidate(s) from database
+2022-08-18 09:37:11.541 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:11.541 INFO Sampled 2048 candidate(s)
+2022-08-18 09:37:11.795 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:12.049 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:12.297 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:12.559 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:12.727 INFO Scores of the best 5 candidates:
+[1 : 5]:	0.5750  0.3845  0.3391  0.0647  0.0150
+2022-08-18 09:37:12.740 INFO Got 5 candidate(s) with evolutionary search
+2022-08-18 09:37:12.746 INFO Sending 5 candidates(s) for measurement
+2022-08-18 09:37:15.266 INFO [Task #0: "main"] Trial #0: GFLOPs: 5.7522. Time: 0.7292 ms. Best GFLOPs: 5.7522
+2022-08-18 09:37:15.266 INFO [Task #0: "main"] Trial #1: GFLOPs: 3.8663. Time: 1.0848 ms. Best GFLOPs: 5.7522
+2022-08-18 09:37:15.266 INFO [Task #0: "main"] Trial #2: GFLOPs: 2.4945. Time: 1.6814 ms. Best GFLOPs: 5.7522
+2022-08-18 09:37:15.266 INFO [Task #0: "main"] Trial #3: GFLOPs: 6.0723. Time: 0.6907 ms. Best GFLOPs: 6.0723
+2022-08-18 09:37:15.266 INFO [Task #0: "main"] Trial #4: GFLOPs: 5.2797. Time: 0.7944 ms. Best GFLOPs: 6.0723
+2022-08-18 09:37:15.809 INFO Generating candidates......
+2022-08-18 09:37:15.811 INFO Picked top 5 candidate(s) from database
+2022-08-18 09:37:15.914 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:15.914 INFO Sampled 2043 candidate(s)
+2022-08-18 09:37:16.144 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:16.380 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:16.647 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:16.909 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:17.073 INFO Scores of the best 0 candidates:
+2022-08-18 09:37:17.088 INFO Got 0 candidate(s) with evolutionary search
+2022-08-18 09:37:17.094 INFO Sending 0 candidates(s) for measurement
+2022-08-18 09:37:17.111 INFO Generating candidates......
+2022-08-18 09:37:17.120 INFO Picked top 5 candidate(s) from database
+2022-08-18 09:37:17.213 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:17.214 INFO Sampled 2043 candidate(s)
+2022-08-18 09:37:17.453 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:17.698 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:17.946 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:18.199 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:18.376 INFO Scores of the best 0 candidates:
+2022-08-18 09:37:18.390 INFO Got 0 candidate(s) with evolutionary search
+2022-08-18 09:37:18.396 INFO Sending 0 candidates(s) for measurement
+2022-08-18 09:37:18.412 INFO Generating candidates......
+2022-08-18 09:37:18.420 INFO Picked top 5 candidate(s) from database
+2022-08-18 09:37:18.512 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:18.512 INFO Sampled 2043 candidate(s)
+2022-08-18 09:37:18.754 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:18.998 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:19.237 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:19.486 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:19.651 INFO Scores of the best 0 candidates:
+2022-08-18 09:37:19.666 INFO Got 0 candidate(s) with evolutionary search
+2022-08-18 09:37:19.672 INFO Sending 0 candidates(s) for measurement
+2022-08-18 09:37:19.685 INFO Generating candidates......
+2022-08-18 09:37:19.691 INFO Picked top 5 candidate(s) from database
+2022-08-18 09:37:19.779 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:19.779 INFO Sampled 2043 candidate(s)
+2022-08-18 09:37:20.028 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:20.262 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:20.509 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:20.758 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:20.921 INFO Scores of the best 0 candidates:
+2022-08-18 09:37:20.937 INFO Got 0 candidate(s) with evolutionary search
+2022-08-18 09:37:20.945 INFO Sending 0 candidates(s) for measurement
+2022-08-18 09:37:20.965 INFO Generating candidates......
+2022-08-18 09:37:20.975 INFO Picked top 5 candidate(s) from database
+2022-08-18 09:37:21.067 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:21.067 INFO Sampled 2043 candidate(s)
+2022-08-18 09:37:21.308 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:21.549 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:21.786 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:22.046 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f17a0e4878)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179f4a4d8)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179f295b8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f17a07eda8)]: 0 failure(s)
+2022-08-18 09:37:22.217 INFO Scores of the best 0 candidates:
+2022-08-18 09:37:22.232 INFO Got 0 candidate(s) with evolutionary search
+2022-08-18 09:37:22.238 INFO Sending 0 candidates(s) for measurement
+2022-08-18 09:39:58.593 INFO Initializing Task #0: "main"
+2022-08-18 09:39:58.594 INFO 
 @tvm.script.ir_module
 class Module:
-    @tir.prim_func
-    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
+    @T.prim_func
+    def main(A: T.Buffer[(128, 128), "float32"], B: T.Buffer[(128, 128), "float32"], C: T.Buffer[(128, 128), "float32"]) -> None:
         # function attr dict
-        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
+        T.func_attr({"global_symbol": "main", "tir.noalias": True})
         # body
-        # with tir.block("root")
-        for i, j_0 in tir.grid(128, 32):
-            for j_1_init in tir.serial(4):
-                with tir.block("C_init"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 4 + j_1_init)
-                    tir.reads()
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = tir.float32(0)
-            for k, j_1 in tir.grid(128, 4):
-                with tir.block("C_update"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 4 + j_1)
-                    vk = tir.axis.reduce(128, k)
-                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
-                    tir.writes(C[vi, vj])
+        # with T.block("root")
+        for i, j, k in T.grid(128, 128, 128):
+            with T.block("C"):
+                vi, vj, vk = T.axis.remap("SSR", [i, j, k])
+                T.reads(A[vi, vk], B[vk, vj])
+                T.writes(C[vi, vj])
+                with T.init():
+                    C[vi, vj] = T.float32(0)
+                C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
+    
+2022-08-18 09:39:58.596 INFO Total 3 design space(s) generated
+2022-08-18 09:39:58.597 INFO Design space #0:
+@tvm.script.ir_module
+class Module:
+    @T.prim_func
+    def main(A: T.Buffer[(128, 128), "float32"], B: T.Buffer[(128, 128), "float32"], C: T.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        T.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        with T.block("root"):
+            T.reads()
+            T.writes()
+            T.block_attr({"meta_schedule.parallel":16, "meta_schedule.unroll_explicit":64, "meta_schedule.vectorize":64})
+            C_global = T.alloc_buffer([128, 128], dtype="float32")
+            for i_0, j_0, i_1, j_1 in T.grid(8, 1, 2, 4):
+                for k_0, i_2, j_2, k_1, i_3, j_3 in T.grid(2, 1, 8, 64, 8, 4):
+                    with T.block("C"):
+                        vi = T.axis.spatial(128, (i_0 * 2 + i_1 + i_2) * 8 + i_3)
+                        vj = T.axis.spatial(128, ((j_0 * 4 + j_1) * 8 + j_2) * 4 + j_3)
+                        vk = T.axis.reduce(128, k_0 * 64 + k_1)
+                        T.reads(A[vi, vk], B[vk, vj])
+                        T.writes(C_global[vi, vj])
+                        T.block_attr({"meta_schedule.tiling_structure":"SSRSRS"})
+                        with T.init():
+                            C_global[vi, vj] = T.float32(0)
+                        C_global[vi, vj] = C_global[vi, vj] + A[vi, vk] * B[vk, vj]
+                for ax0, ax1 in T.grid(8, 32):
+                    with T.block("C_global"):
+                        v0 = T.axis.spatial(128, i_0 * 16 + i_1 * 8 + ax0)
+                        v1 = T.axis.spatial(128, j_1 * 32 + ax1)
+                        T.reads(C_global[v0, v1])
+                        T.writes(C[v0, v1])
+                        C[v0, v1] = C_global[v0, v1]
+    
+b0 = sch.get_block(name="C", func_name="main")
+b1 = sch.get_block(name="root", func_name="main")
+sch.annotate(block_or_loop=b0, ann_key="meta_schedule.tiling_structure", ann_val="SSRSRS")
+l2, l3, l4 = sch.get_loops(block=b0)
+v5, v6, v7, v8 = sch.sample_perfect_tile(loop=l2, n=4, max_innermost_factor=64, decision=[8, 2, 1, 8])
+l9, l10, l11, l12 = sch.split(loop=l2, factors=[v5, v6, v7, v8], preserve_unit_iters=True)
+v13, v14, v15, v16 = sch.sample_perfect_tile(loop=l3, n=4, max_innermost_factor=64, decision=[1, 4, 8, 4])
+l17, l18, l19, l20 = sch.split(loop=l3, factors=[v13, v14, v15, v16], preserve_unit_iters=True)
+v21, v22 = sch.sample_perfect_tile(loop=l4, n=2, max_innermost_factor=64, decision=[2, 64])
+l23, l24 = sch.split(loop=l4, factors=[v21, v22], preserve_unit_iters=True)
+sch.reorder(l9, l17, l10, l18, l23, l11, l19, l24, l12, l20)
+b25 = sch.cache_write(block=b0, write_buffer_index=0, storage_scope="global")
+sch.reverse_compute_at(block=b25, loop=l18, preserve_unit_loops=True)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.parallel", ann_val=16)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.vectorize", ann_val=64)
+v26 = sch.sample_categorical(candidates=[0, 16, 64, 512], probs=[0.25, 0.25, 0.25, 0.25], decision=2)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.unroll_explicit", ann_val=v26)
+2022-08-18 09:39:58.598 INFO Design space #1:
+@tvm.script.ir_module
+class Module:
+    @T.prim_func
+    def main(A: T.Buffer[(128, 128), "float32"], B: T.Buffer[(128, 128), "float32"], C: T.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        T.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        with T.block("root"):
+            T.reads()
+            T.writes()
+            T.block_attr({"meta_schedule.parallel":16, "meta_schedule.unroll_explicit":64, "meta_schedule.vectorize":64})
+            C_global = T.alloc_buffer([128, 128], dtype="float32")
+            for i_0, j_0 in T.grid(8, 1):
+                for i_1, j_1, k_0, i_2, j_2, k_1, i_3, j_3 in T.grid(2, 4, 2, 1, 8, 64, 8, 4):
+                    with T.block("C"):
+                        vi = T.axis.spatial(128, (i_0 * 2 + i_1 + i_2) * 8 + i_3)
+                        vj = T.axis.spatial(128, ((j_0 * 4 + j_1) * 8 + j_2) * 4 + j_3)
+                        vk = T.axis.reduce(128, k_0 * 64 + k_1)
+                        T.reads(A[vi, vk], B[vk, vj])
+                        T.writes(C_global[vi, vj])
+                        T.block_attr({"meta_schedule.tiling_structure":"SSRSRS"})
+                        with T.init():
+                            C_global[vi, vj] = T.float32(0)
+                        C_global[vi, vj] = C_global[vi, vj] + A[vi, vk] * B[vk, vj]
+                for ax0, ax1 in T.grid(16, 128):
+                    with T.block("C_global"):
+                        v0 = T.axis.spatial(128, i_0 * 16 + ax0)
+                        v1 = T.axis.spatial(128, ax1)
+                        T.reads(C_global[v0, v1])
+                        T.writes(C[v0, v1])
+                        C[v0, v1] = C_global[v0, v1]
+    
+b0 = sch.get_block(name="C", func_name="main")
+b1 = sch.get_block(name="root", func_name="main")
+sch.annotate(block_or_loop=b0, ann_key="meta_schedule.tiling_structure", ann_val="SSRSRS")
+l2, l3, l4 = sch.get_loops(block=b0)
+v5, v6, v7, v8 = sch.sample_perfect_tile(loop=l2, n=4, max_innermost_factor=64, decision=[8, 2, 1, 8])
+l9, l10, l11, l12 = sch.split(loop=l2, factors=[v5, v6, v7, v8], preserve_unit_iters=True)
+v13, v14, v15, v16 = sch.sample_perfect_tile(loop=l3, n=4, max_innermost_factor=64, decision=[1, 4, 8, 4])
+l17, l18, l19, l20 = sch.split(loop=l3, factors=[v13, v14, v15, v16], preserve_unit_iters=True)
+v21, v22 = sch.sample_perfect_tile(loop=l4, n=2, max_innermost_factor=64, decision=[2, 64])
+l23, l24 = sch.split(loop=l4, factors=[v21, v22], preserve_unit_iters=True)
+sch.reorder(l9, l17, l10, l18, l23, l11, l19, l24, l12, l20)
+b25 = sch.cache_write(block=b0, write_buffer_index=0, storage_scope="global")
+sch.reverse_compute_at(block=b25, loop=l17, preserve_unit_loops=True)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.parallel", ann_val=16)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.vectorize", ann_val=64)
+v26 = sch.sample_categorical(candidates=[0, 16, 64, 512], probs=[0.25, 0.25, 0.25, 0.25], decision=2)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.unroll_explicit", ann_val=v26)
+2022-08-18 09:39:58.599 INFO Design space #2:
+@tvm.script.ir_module
+class Module:
+    @T.prim_func
+    def main(A: T.Buffer[(128, 128), "float32"], B: T.Buffer[(128, 128), "float32"], C: T.Buffer[(128, 128), "float32"]) -> None:
+        # function attr dict
+        T.func_attr({"global_symbol": "main", "tir.noalias": True})
+        # body
+        with T.block("root"):
+            T.reads()
+            T.writes()
+            T.block_attr({"meta_schedule.parallel":16, "meta_schedule.unroll_explicit":64, "meta_schedule.vectorize":64})
+            for i_0, j_0, i_1, j_1, k_0, i_2, j_2, k_1, i_3, j_3 in T.grid(8, 1, 2, 4, 2, 1, 8, 64, 8, 4):
+                with T.block("C"):
+                    vi = T.axis.spatial(128, (i_0 * 2 + i_1 + i_2) * 8 + i_3)
+                    vj = T.axis.spatial(128, ((j_0 * 4 + j_1) * 8 + j_2) * 4 + j_3)
+                    vk = T.axis.reduce(128, k_0 * 64 + k_1)
+                    T.reads(A[vi, vk], B[vk, vj])
+                    T.writes(C[vi, vj])
+                    T.block_attr({"meta_schedule.tiling_structure":"SSRSRS"})
+                    with T.init():
+                        C[vi, vj] = T.float32(0)
                     C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
     
 b0 = sch.get_block(name="C", func_name="main")
-l1, l2, l3 = sch.get_loops(block=b0)
-v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[32, 4])
-l6, l7 = sch.split(loop=l2, factors=[v4, v5])
-sch.reorder(l1, l6, l3, l7)
-b8 = sch.decompose_reduction(block=b0, loop=l3)
-sch.enter_postproc()
-2022-08-13 22:36:43.236 INFO [Task #0: "main"] Trial #2: Error in building: LocalRunner: An exception occurred
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
-    restore_signals, start_new_session)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
-    startupinfo)
-FileNotFoundError: [WinError 2] 系统找不到指定的文件。
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
-    result = fn(*args, **kwargs)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
-    rt_mod = tvm.runtime.load_module(artifact_path)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
-    _cc.create_shared(path + ".so", files)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
-    _windows_compile(output, objects, options)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
-    "Can not find the LLVM clang for Windows clang.exe)."
-RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
-
-@tvm.script.ir_module
-class Module:
-    @tir.prim_func
-    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
-        # function attr dict
-        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
-        # body
-        # with tir.block("root")
-        for i, j_0 in tir.grid(128, 8):
-            for j_1_init in tir.serial(16):
-                with tir.block("C_init"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 16 + j_1_init)
-                    tir.reads()
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = tir.float32(0)
-            for k, j_1 in tir.grid(128, 16):
-                with tir.block("C_update"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 16 + j_1)
-                    vk = tir.axis.reduce(128, k)
-                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
-    
-b0 = sch.get_block(name="C", func_name="main")
-l1, l2, l3 = sch.get_loops(block=b0)
-v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[8, 16])
-l6, l7 = sch.split(loop=l2, factors=[v4, v5])
-sch.reorder(l1, l6, l3, l7)
-b8 = sch.decompose_reduction(block=b0, loop=l3)
-sch.enter_postproc()
-2022-08-13 22:36:43.236 INFO [Task #0: "main"] Trial #3: Error in building: LocalRunner: An exception occurred
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
-    restore_signals, start_new_session)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
-    startupinfo)
-FileNotFoundError: [WinError 2] 系统找不到指定的文件。
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
-    result = fn(*args, **kwargs)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
-    rt_mod = tvm.runtime.load_module(artifact_path)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
-    _cc.create_shared(path + ".so", files)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
-    _windows_compile(output, objects, options)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
-    "Can not find the LLVM clang for Windows clang.exe)."
-RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
-
-@tvm.script.ir_module
-class Module:
-    @tir.prim_func
-    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
-        # function attr dict
-        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
-        # body
-        # with tir.block("root")
-        for i, j_0 in tir.grid(128, 128):
-            for j_1_init in tir.serial(1):
-                with tir.block("C_init"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 + j_1_init)
-                    tir.reads()
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = tir.float32(0)
-            for k, j_1 in tir.grid(128, 1):
-                with tir.block("C_update"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 + j_1)
-                    vk = tir.axis.reduce(128, k)
-                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
-    
-b0 = sch.get_block(name="C", func_name="main")
-l1, l2, l3 = sch.get_loops(block=b0)
-v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[128, 1])
-l6, l7 = sch.split(loop=l2, factors=[v4, v5])
-sch.reorder(l1, l6, l3, l7)
-b8 = sch.decompose_reduction(block=b0, loop=l3)
-sch.enter_postproc()
-2022-08-13 22:36:43.237 INFO [Task #0: "main"] Trial #4: Error in building: LocalRunner: An exception occurred
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 267, in _windows_compile
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 800, in __init__
-    restore_signals, start_new_session)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\subprocess.py", line 1207, in _execute_child
-    startupinfo)
-FileNotFoundError: [WinError 2] 系统找不到指定的文件。
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\exec\popen_worker.py", line 87, in main
-    result = fn(*args, **kwargs)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\meta_schedule\runner\local_runner.py", line 144, in _worker_func
-    rt_mod = tvm.runtime.load_module(artifact_path)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\runtime\module.py", line 582, in load_module
-    _cc.create_shared(path + ".so", files)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 81, in create_shared
-    _windows_compile(output, objects, options)
-  File "c:\Users\25966\anaconda3\envs\mlc\lib\site-packages\tvm\contrib\cc.py", line 271, in _windows_compile
-    "Can not find the LLVM clang for Windows clang.exe)."
-RuntimeError: Can not find the LLVM clang for Windows clang.exe).Make sure it's installed and the installation directory is in the %PATH% environment variable. Prebuilt binaries can be found at: https://llvm.org/
-
-@tvm.script.ir_module
-class Module:
-    @tir.prim_func
-    def func(A: tir.Buffer[(128, 128), "float32"], B: tir.Buffer[(128, 128), "float32"], C: tir.Buffer[(128, 128), "float32"]) -> None:
-        # function attr dict
-        tir.func_attr({"global_symbol": "main", "tir.noalias": True})
-        # body
-        # with tir.block("root")
-        for i, j_0 in tir.grid(128, 16):
-            for j_1_init in tir.serial(8):
-                with tir.block("C_init"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 8 + j_1_init)
-                    tir.reads()
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = tir.float32(0)
-            for k, j_1 in tir.grid(128, 8):
-                with tir.block("C_update"):
-                    vi = tir.axis.spatial(128, i)
-                    vj = tir.axis.spatial(128, j_0 * 8 + j_1)
-                    vk = tir.axis.reduce(128, k)
-                    tir.reads(C[vi, vj], A[vi, vk], B[vk, vj])
-                    tir.writes(C[vi, vj])
-                    C[vi, vj] = C[vi, vj] + A[vi, vk] * B[vk, vj]
-    
-b0 = sch.get_block(name="C", func_name="main")
-l1, l2, l3 = sch.get_loops(block=b0)
-v4, v5 = sch.sample_perfect_tile(loop=l2, n=2, max_innermost_factor=16, decision=[16, 8])
-l6, l7 = sch.split(loop=l2, factors=[v4, v5])
-sch.reorder(l1, l6, l3, l7)
-b8 = sch.decompose_reduction(block=b0, loop=l3)
-sch.enter_postproc()
+b1 = sch.get_block(name="root", func_name="main")
+sch.annotate(block_or_loop=b0, ann_key="meta_schedule.tiling_structure", ann_val="SSRSRS")
+l2, l3, l4 = sch.get_loops(block=b0)
+v5, v6, v7, v8 = sch.sample_perfect_tile(loop=l2, n=4, max_innermost_factor=64, decision=[8, 2, 1, 8])
+l9, l10, l11, l12 = sch.split(loop=l2, factors=[v5, v6, v7, v8], preserve_unit_iters=True)
+v13, v14, v15, v16 = sch.sample_perfect_tile(loop=l3, n=4, max_innermost_factor=64, decision=[1, 4, 8, 4])
+l17, l18, l19, l20 = sch.split(loop=l3, factors=[v13, v14, v15, v16], preserve_unit_iters=True)
+v21, v22 = sch.sample_perfect_tile(loop=l4, n=2, max_innermost_factor=64, decision=[2, 64])
+l23, l24 = sch.split(loop=l4, factors=[v21, v22], preserve_unit_iters=True)
+sch.reorder(l9, l17, l10, l18, l23, l11, l19, l24, l12, l20)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.parallel", ann_val=16)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.vectorize", ann_val=64)
+v25 = sch.sample_categorical(candidates=[0, 16, 64, 512], probs=[0.25, 0.25, 0.25, 0.25], decision=2)
+sch.annotate(block_or_loop=b1, ann_key="meta_schedule.unroll_explicit", ann_val=v25)
+2022-08-18 09:39:58.611 INFO Generating candidates......
+2022-08-18 09:39:58.617 INFO Picked top 5 candidate(s) from database
+2022-08-18 09:39:59.155 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:39:59.155 INFO Sampled 2043 candidate(s)
+2022-08-18 09:39:59.764 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:00.383 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:01.028 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:01.778 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:01.989 INFO Scores of the best 64 candidates:
+[1 : 16]:	1.0000  1.0000  1.0000  0.9996  0.9996  0.9995  0.9994  0.9994  0.9993  0.9986  0.9985  0.9984  0.9983  0.9981  0.9980  0.9979
+[17 : 32]:	0.9978  0.9976  0.9974  0.9973  0.9973  0.9972  0.9971  0.9970  0.9967  0.9967  0.9965  0.9961  0.9961  0.9959  0.9958  0.9957
+[33 : 48]:	0.9957  0.9957  0.9957  0.9955  0.9955  0.9954  0.9954  0.9951  0.9951  0.9950  0.9949  0.9949  0.9949  0.9948  0.9946  0.9945
+[49 : 64]:	0.9942  0.9940  0.9939  0.9939  0.9937  0.9936  0.9935  0.9934  0.9933  0.9933  0.9930  0.9930  0.9929  0.9929  0.9929  0.9928
+2022-08-18 09:40:02.127 INFO Got 64 candidate(s) with evolutionary search
+2022-08-18 09:40:02.131 INFO Sending 63 candidates(s) for measurement
+2022-08-18 09:40:29.144 INFO [Task #0: "main"] Trial #0: GFLOPs: 88.6986. Time: 0.0473 ms. Best GFLOPs: 88.6986
+2022-08-18 09:40:29.144 INFO [Task #0: "main"] Trial #1: GFLOPs: 115.3168. Time: 0.0364 ms. Best GFLOPs: 115.3168
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #2: GFLOPs: 62.6345. Time: 0.0670 ms. Best GFLOPs: 115.3168
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #3: GFLOPs: 71.7125. Time: 0.0585 ms. Best GFLOPs: 115.3168
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #4: GFLOPs: 26.5923. Time: 0.1577 ms. Best GFLOPs: 115.3168
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #5: GFLOPs: 126.5809. Time: 0.0331 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #6: GFLOPs: 55.5054. Time: 0.0756 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #7: GFLOPs: 77.9872. Time: 0.0538 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #8: GFLOPs: 15.8983. Time: 0.2638 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #9: GFLOPs: 43.7851. Time: 0.0958 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #10: GFLOPs: 58.2166. Time: 0.0720 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #11: GFLOPs: 60.1576. Time: 0.0697 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #12: GFLOPs: 84.5379. Time: 0.0496 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.145 INFO [Task #0: "main"] Trial #13: GFLOPs: 98.3493. Time: 0.0426 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #14: GFLOPs: 16.5743. Time: 0.2531 ms. Best GFLOPs: 126.5809
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #15: GFLOPs: 136.4484. Time: 0.0307 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #16: GFLOPs: 19.5514. Time: 0.2145 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #17: GFLOPs: 55.1409. Time: 0.0761 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #18: GFLOPs: 46.9674. Time: 0.0893 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #19: GFLOPs: 19.3447. Time: 0.2168 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #20: GFLOPs: 47.6164. Time: 0.0881 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #21: GFLOPs: 72.9409. Time: 0.0575 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #22: GFLOPs: 39.5639. Time: 0.1060 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #23: GFLOPs: 44.5131. Time: 0.0942 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.146 INFO [Task #0: "main"] Trial #24: GFLOPs: 64.1151. Time: 0.0654 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #25: GFLOPs: 42.0305. Time: 0.0998 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #26: GFLOPs: 6.8271. Time: 0.6144 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #27: GFLOPs: 66.6985. Time: 0.0629 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #28: GFLOPs: 109.1727. Time: 0.0384 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #29: GFLOPs: 59.0165. Time: 0.0711 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #30: GFLOPs: 80.3406. Time: 0.0522 ms. Best GFLOPs: 136.4484
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #31: GFLOPs: 151.9782. Time: 0.0276 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #32: GFLOPs: 108.6483. Time: 0.0386 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #33: GFLOPs: 63.6741. Time: 0.0659 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.147 INFO [Task #0: "main"] Trial #34: GFLOPs: 17.9768. Time: 0.2333 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #35: GFLOPs: 105.5017. Time: 0.0398 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #36: GFLOPs: 102.8102. Time: 0.0408 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #37: GFLOPs: 151.6142. Time: 0.0277 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #38: GFLOPs: 18.5930. Time: 0.2256 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #39: GFLOPs: 54.4201. Time: 0.0771 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #40: GFLOPs: 122.3413. Time: 0.0343 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #41: GFLOPs: 25.5320. Time: 0.1643 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #42: GFLOPs: 144.9426. Time: 0.0289 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #43: GFLOPs: 24.3385. Time: 0.1723 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #44: GFLOPs: 141.4931. Time: 0.0296 ms. Best GFLOPs: 151.9782
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #45: GFLOPs: 164.5257. Time: 0.0255 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #46: GFLOPs: 57.9290. Time: 0.0724 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #47: GFLOPs: 60.9055. Time: 0.0689 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #48: GFLOPs: 36.3087. Time: 0.1155 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #49: GFLOPs: 38.6216. Time: 0.1086 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #50: GFLOPs: 49.2503. Time: 0.0852 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #51: GFLOPs: 73.6837. Time: 0.0569 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #52: GFLOPs: 67.6345. Time: 0.0620 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #53: GFLOPs: 14.5486. Time: 0.2883 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #54: GFLOPs: 124.5603. Time: 0.0337 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #55: GFLOPs: 24.6643. Time: 0.1701 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #56: GFLOPs: 19.3153. Time: 0.2171 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #57: GFLOPs: 97.6618. Time: 0.0429 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #58: GFLOPs: 34.2822. Time: 0.1223 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #59: GFLOPs: 148.4946. Time: 0.0282 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #60: GFLOPs: 23.5933. Time: 0.1778 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #61: GFLOPs: 57.0973. Time: 0.0735 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.148 INFO [Task #0: "main"] Trial #62: GFLOPs: 92.7870. Time: 0.0452 ms. Best GFLOPs: 164.5257
+2022-08-18 09:40:29.282 INFO Generating candidates......
+2022-08-18 09:40:29.301 INFO Picked top 68 candidate(s) from database
+2022-08-18 09:40:29.802 INFO Sample-Init-Population summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:29.802 INFO Sampled 1980 candidate(s)
+2022-08-18 09:40:30.392 INFO Evolve iter #0 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:31.013 INFO Evolve iter #1 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:31.686 INFO Evolve iter #2 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:32.423 INFO Evolve iter #3 done. Summary:
+Postproc #0 [meta_schedule.DisallowDynamicLoop(0x55f179f507c8)]: 0 failure(s)
+Postproc #1 [meta_schedule.RewriteParallelVectorizeUnroll(0x55f179c80788)]: 0 failure(s)
+Postproc #2 [meta_schedule.RewriteReductionBlock(0x55f179de93a8)]: 0 failure(s)
+Postproc #3 [meta_schedule.RewriteLayout(0x55f179dcf2b8)]: 0 failure(s)
+2022-08-18 09:40:32.666 INFO Scores of the best 1 candidates:
+[1 : 1]:	1.0000
+2022-08-18 09:40:32.771 INFO Got 1 candidate(s) with evolutionary search
+2022-08-18 09:40:32.779 INFO Sending 1 candidates(s) for measurement
+2022-08-18 09:40:33.911 INFO [Task #0: "main"] Trial #63: GFLOPs: 16.0097. Time: 0.2620 ms. Best GFLOPs: 164.5257
